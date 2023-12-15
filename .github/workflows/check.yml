@@ -32,7 +32,18 @@ jobs:
 
   fmt:
     runs-on: ubuntu-latest
-    name: ( fmt + hack ) rust stable
+    name: ( fmt + hack ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}
+    permissions:
+      contents: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # Get early warning of new lints which are regularly introduced in beta channels.
+        toolchain: [stable]
+        nodever: [20]
+        trunkver: ["^0.18"]
+        tauriver: ["^1.5"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,21 +65,29 @@ jobs:
             libsoup2.4-dev \
             libjavascriptcoregtk-4.0-dev
 
-      - name: Install toolchain stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
-      - name: cargo fmt --check
-        run: cargo fmt --check
-
-      - name: Install node 20
+      - name: Install node ${{ matrix.nodever }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.nodever }}
+            
+      - name: Install toolchain ${{ matrix.toolchain }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: rustfmt
+          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
 
-      - name: Install trunk ^0.18
-        run: cargo install --version ^0.18 --locked --debug trunk
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install trunk ${{ matrix.trunkver }}
+        run: cargo binstall --version ${{ matrix.trunkver }} --locked -y trunk
+
+      - name: Install tauri-cli ${{ matrix.tauriver }}
+        run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
+        
+      - name: cargo fmt --check
+        run: cargo fmt --check
 
       - name: Install node packages
         working-directory: ./web_frontend
@@ -98,6 +117,8 @@ jobs:
         # Get early warning of new lints which are regularly introduced in beta channels.
         toolchain: [beta]
         nodever: [latest]
+        trunkver: ["^0.18"]
+        tauriver: ["^1.5"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -118,6 +139,11 @@ jobs:
             libsoup2.4-dev \
             libjavascriptcoregtk-4.0-dev
 
+      - name: Install node ${{ matrix.nodever }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.nodever }}
+            
       - name: Install toolchain ${{ matrix.toolchain }}
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -125,13 +151,14 @@ jobs:
           components: clippy
           targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
 
-      - name: Install node ${{ matrix.nodever }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.nodever }}
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
 
-      - name: Install trunk
-        run: cargo install --locked --debug trunk
+      - name: Install trunk ${{ matrix.trunkver }}
+        run: cargo binstall --version ${{ matrix.trunkver }} --locked -y trunk
+
+      - name: Install tauri-cli ${{ matrix.tauriver }}
+        run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
 
       - name: Install node packages
         working-directory: ./web_frontend
@@ -148,22 +175,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-features
 
-      # - name: Install required cargo
-      #   run: cargo install --locked clippy-sarif sarif-fmt
-
-      # - name: Run rust-clippy
-      #   run:
-      #     cargo clippy
-      #     --all-features
-      #     --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
-      #   continue-on-error: true
-
-      # - name: Upload analysis results to GitHub
-      #   uses: github/codeql-action/upload-sarif@v3
-      #   with:
-      #     sarif_file: rust-clippy-results.sarif
-      #     wait-for-processing: true
-
       - name: cargo doc
         run: cargo doc --no-deps --all-features
         env:
@@ -176,9 +187,11 @@ jobs:
     # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
     strategy:
       matrix:
-        msrv: ["1.70"] # 2021 edition requires 1.56.1
+        toolchain: ["1.70"] # 2021 edition requires 1.56.1
         nodever: [14]
-    name: ( msrv ) rust ${{ matrix.msrv }} / node ${{ matrix.nodever }}
+        trunkver: ["^0.18"]
+        tauriver: ["^1.5"]
+    name: ( msrv ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -200,19 +213,26 @@ jobs:
             libsoup2.4-dev \
             libjavascriptcoregtk-4.0-dev
 
-      - name: Install toolchain ${{ matrix.msrv }}
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ matrix.msrv }}
-          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
-
       - name: Install node ${{ matrix.nodever }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.nodever }}
+            
+      - name: Install toolchain ${{ matrix.toolchain }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
+          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
 
-      - name: Install trunk ^0.18
-        run: cargo install --version ^0.18 --locked --debug trunk
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install trunk ${{ matrix.trunkver }}
+        run: cargo binstall --version ${{ matrix.trunkver }} --locked -y trunk
+
+      - name: Install tauri-cli ${{ matrix.tauriver }}
+        run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
 
       - name: Install node packages
         working-directory: ./web_frontend
@@ -224,5 +244,5 @@ jobs:
         run: trunk build
         working-directory: ./web_frontend
 
-      - name: cargo +${{ matrix.msrv }} check
+      - name: cargo +${{ matrix.toolchain }} check
         run: cargo check
