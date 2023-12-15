@@ -1,5 +1,7 @@
 [workspace]
 members = ["web_frontend", "privaxy", "src-tauri"]
+resolver = "2"
+package.rust-version = "1.70"
 
 [profile.release]
 lto = true
