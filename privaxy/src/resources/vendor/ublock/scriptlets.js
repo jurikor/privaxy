@@ -904,8 +904,42 @@
 /// alias set.js
 (function() {
     const chain = '{{1}}';
+    if ( chain === '{{1}}' || chain === '' ) { return; }
     let cValue = '{{2}}';
+    const trappedProp = (( ) => {
+        const pos = chain.lastIndexOf('.');
+        if ( pos === -1 ) { return chain; }
+        return chain.slice(pos+1);
+    })();
+    if ( trappedProp === '' ) { return; }
     const thisScript = document.currentScript;
+    const objectDefineProperty = Object.defineProperty.bind(Object);
+    const cloakFunc = fn => {
+        objectDefineProperty(fn, 'name', { value: trappedProp });
+        const proxy = new Proxy(fn, {
+            defineProperty(target, prop) {
+                if ( prop !== 'toString' ) {
+                    return Reflect.deleteProperty(...arguments);
+                }
+                return true;
+            },
+            deleteProperty(target, prop) {
+                if ( prop !== 'toString' ) {
+                    return Reflect.deleteProperty(...arguments);
+                }
+                return true;
+            },
+            get(target, prop) {
+                if ( prop === 'toString' ) {
+                    return function() {
+                        return `function ${trappedProp}() { [native code] }`;
+                    }.bind(null);
+                }
+                return Reflect.get(...arguments);
+            },
+        });
+        return proxy;
+    };
     if ( cValue === 'undefined' ) {
         cValue = undefined;
     } else if ( cValue === 'false' ) {
@@ -921,11 +955,11 @@
     } else if ( cValue === '{}' ) {
         cValue = {};
     } else if ( cValue === 'noopFunc' ) {
-        cValue = function(){};
+        cValue = cloakFunc(function(){});
     } else if ( cValue === 'trueFunc' ) {
-        cValue = function(){ return true; };
+        cValue = cloakFunc(function(){ return true; });
     } else if ( cValue === 'falseFunc' ) {
-        cValue = function(){ return false; };
+        cValue = cloakFunc(function(){ return false; });
     } else if ( /^\d+$/.test(cValue) ) {
         cValue = parseFloat(cValue);
         if ( isNaN(cValue) ) { return; }
@@ -958,7 +992,7 @@
             }
         }
         try {
-            Object.defineProperty(owner, prop, {
+            objectDefineProperty(owner, prop, {
                 configurable,
                 get() {
                     if ( prevGetter !== undefined ) {
@@ -1668,7 +1702,6 @@
 })();
 
 
-
 /// xml-prune.js
 (function() {
     let selector = '{{1}}';
@@ -1739,7 +1772,6 @@
 })();
 
 
-
 /// m3u-prune.js
 // https://en.wikipedia.org/wiki/M3U
 (function() {
@@ -1753,7 +1785,12 @@
     }
     const regexFromArg = arg => {
         if ( arg === '' ) { return /^/; }
-        if ( /^\/.*\/$/.test(arg) ) { return new RegExp(arg.slice(1, -1)); }
+        const match = /^\/(.+)\/([gms]*)$/.exec(arg);
+        if ( match !== null ) {
+            let flags = match[2] || '';
+            if ( flags.includes('m') ) { flags += 's'; }
+            return new RegExp(match[1], flags);
+        }
         return new RegExp(
             arg.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*+/g, '.*?')
         );
@@ -1790,6 +1827,22 @@
     };
     const pruner = text => {
         if ( (/^\s*#EXTM3U/.test(text)) === false ) { return text; }
+        if ( reM3u.multiline ) {
+            reM3u.lastIndex = 0;
+            for (;;) {
+                const match = reM3u.exec(text);
+                if ( match === null ) { break; }
+                const before = text.slice(0, match.index);
+                if ( before.length === 0 || /[\n\r]+\s*$/.test(before) ) {
+                    const after = text.slice(match.index + match[0].length);
+                    if ( after.length === 0 || /^\s*[\n\r]+/.test(after) ) {
+                        text = before.trim() + '\n' + after.trim();
+                        reM3u.lastIndex = before.length + 1;
+                    }
+                }
+                if ( reM3u.global === false ) { break; }
+            }
+        }
         const lines = text.split(/\n\r|\n|\r/);
         for ( let i = 0; i < lines.length; i++ ) {
             if ( lines[i] === undefined ) { continue; }
@@ -1840,6 +1893,120 @@
     });
 })();
 
+
+/// href-sanitizer.js
+(function() {
+    let selector = '{{1}}';
+    if ( selector === '{{1}}' ) { selector = ''; }
+    if ( selector === '' ) { return; }
+    let source = '{{2}}';
+    if ( source === '{{2}}' ) { source = ''; }
+    if ( source === '' ) { source = 'text'; }
+    const sanitizeCopycats = (href, text) => {
+        let elems = [];
+        try {
+            elems = document.querySelectorAll(`a[href="${href}"`);
+        }
+        catch(ex) {
+        }
+        for ( const elem of elems ) {
+            elem.setAttribute('href', text);
+        }
+    };
+    const extractText = (elem, source) => {
+        if ( /^\[.*\]$/.test(source) ) {
+            return elem.getAttribute(source.slice(1,-1).trim()) || '';
+        }
+        if ( source !== 'text' ) { return ''; }
+        const text = elem.textContent
+            .replace(/^[^\x21-\x7e]+/, '') // remove leading invalid characters
+            .replace(/[^\x21-\x7e]+$/, '') // remove trailing invalid characters
+            ;
+        if ( /^https:\/\/./.test(text) === false ) { return ''; }
+        if ( /[^\x21-\x7e]/.test(text) ) { return ''; }
+        return text;
+    };
+    const sanitize = ( ) => {
+        let elems = [];
+        try {
+            elems = document.querySelectorAll(selector);
+        }
+        catch(ex) {
+            return false;
+        }
+        for ( const elem of elems ) {
+            if ( elem.localName !== 'a' ) { continue; }
+            if ( elem.hasAttribute('href') === false ) { continue; }
+            const href = elem.getAttribute('href');
+            const text = extractText(elem, source);
+            if ( text === '' ) { continue; }
+            if ( href === text ) { continue; }
+            elem.setAttribute('href', text);
+            sanitizeCopycats(href, text);
+        }
+        return true;
+    };
+    let observer, timer;
+    const onDomChanged = mutations => {
+        if ( timer !== undefined ) { return; }
+        let shouldSanitize = false;
+        for ( const mutation of mutations ) {
+            if ( mutation.addedNodes.length === 0 ) { continue; }
+            for ( const node of mutation.addedNodes ) {
+                if ( node.nodeType !== 1 ) { continue; }
+                shouldSanitize = true;
+                break;
+            }
+            if ( shouldSanitize ) { break; }
+        }
+        if ( shouldSanitize === false ) { return; }
+        timer = self.requestAnimationFrame(( ) => {
+            timer = undefined;
+            sanitize();
+        });
+    };
+    const start = ( ) => {
+        if ( sanitize() === false ) { return; }
+        observer = new MutationObserver(onDomChanged);
+        observer.observe(document.body, {
+            subtree: true,
+            childList: true,
+        });
+    };
+    if ( document.readyState === 'loading' ) {
+        document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+        start();
+    }
+})();
+
+
+/// call-nothrow.js
+(function() {
+    const chain = '{{1}}';
+    if ( chain === '' || chain === '{{1}}' ) { return; }
+    const parts = chain.split('.');
+    let owner = window, prop;
+    for (;;) {
+        prop = parts.shift();
+        if ( parts.length === 0 ) { break; }
+        owner = owner[prop];
+        if ( owner instanceof Object === false ) { return; }
+    }
+    if ( prop === '' ) { return; }
+    const fn = owner[prop];
+    if ( typeof fn !== 'function' ) { return; }
+    owner[prop] = new Proxy(fn, {
+        apply: function(...args) {
+            let r;
+            try {
+                r = Reflect.apply(...args);
+            } catch(ex) {
+            }
+            return r;
+        },
+    });
+})();
 
 
 // These lines below are skipped by the resource parser.

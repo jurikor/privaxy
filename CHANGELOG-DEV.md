@@ -2,6 +2,10 @@
 
 ## [ no-ver ]
 
+### uBlock 1.48.8
+
+## [ no-ver ]
+
 ### All packages set to minor versions
 
 ### Bump packages (major an minor versions):
