@@ -1,0 +1,44 @@
+# EditorConfig
+# http://EditorConfig.org
+
+
+root = true
+
+
+[*]
+charset                  = utf-8
+trim_trailing_whitespace = true
+insert_final_newline     = true
+end_of_line              = lf
+tab_width                = 4
+
+[{*.{awk,bat,c,cpp,d,dasc,h,l,re,skl,w32,y},Makefile*}]
+indent_size              = 4
+indent_style             = tab
+
+[*.{dtd,html,inc,php,phpt,rng,wsdl,xml,xsd,xsl,py}]
+indent_size              = 4
+indent_style             = space
+
+[{*.{ac,m4,yml,json},Dockerfile*}]
+indent_size              = 2
+indent_style             = space
+
+[*.md]
+indent_style             = space
+max_line_length          = 79
+trim_trailing_whitespace = false
+
+[*.sh]
+max_line_length = 79
+keep_padding = true             # shfmt: -kp
+space_redirects = true          # shfmt: -sr
+switch_case_indent = true       # shfmt: -ci
+
+[COMMIT_EDITMSG]
+indent_size              = 4
+indent_style             = space
+max_line_length          = 79
+
+[*.patch]
+trim_trailing_whitespace = false

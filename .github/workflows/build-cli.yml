@@ -1,0 +1,68 @@
+name: build-cli
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    name: ${{ matrix.os }} / rust ${{ matrix.rustver }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: privaxy
+            rustver: 1.74
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: privaxy.exe
+            rustver: 1.74
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Cache build artifacts
+      uses: actions/cache@v3
+      with:
+        key:  cli_${{ matrix.target }}_artifacts
+        path: |
+          ./target
+          ~/.cargo
+
+    - name: Install toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ matrix.rustver }}
+        targets: ${{ matrix.target }}
+
+    # - name: Show installed versions
+    #   run: |
+    #     rustc -V
+    #     cargo -V
+    #     rustup -V
+
+    - name: Build cli app
+      run: cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target
+
+    - name: Release privaxy-cli ${{ github.ref_name}}-${{ github.sha }}
+      uses: softprops/action-gh-release@v1
+      # if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: privaxy-cli ${{ github.ref_name}}-${{ github.sha }}
+        tag_name: cli-${{ github.sha }}
+        target_commitish: ${{ github.sha }}
+        draft: true
+        prerelease: true
+        generate_release_notes: true
+        append_body: true
+        files: |
+          target/${{ matrix.target }}/release/${{ matrix.bin }}

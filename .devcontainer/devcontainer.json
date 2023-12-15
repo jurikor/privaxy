@@ -1,0 +1,64 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+  "name": "privaxy.devcon",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  // "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
+  "build": {
+        // Path is relative to the devcontainer.json file.
+        "dockerfile": "Dockerfile"
+  },
+  "features": {
+  "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "version": "3.11"
+  },
+  "ghcr.io/devcontainers/features/rust:1": {
+      "version": "1.74",
+      "profile": "default"
+  }
+  },
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "yarn install",
+  // "postCreateCommand": "rustup target add wasm32-unknown-unknown && cargo install --locked --debug trunk && cargo install --locked --debug tauri-cli",
+  "postCreateCommand": "rustup target add wasm32-unknown-unknown && curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash && cargo binstall --version 0.18 --target x86_64-unknown-linux-gnu --locked -y trunk && cargo binstall --version 1.5 --target x86_64-unknown-linux-gnu --locked -y tauri-cli",
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Set *default* container specific settings.json values on container create.
+      "settings": {},
+      "extensions": [
+        // "vadimcn.vscode-lldb",
+        // "serayuzgur.crates",
+        "editorconfig.editorconfig",
+        // "dbaeumer.vscode-eslint",
+        // "tamasfe.even-better-toml",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "github.vscode-github-actions",
+        "codezombiech.gitignore",
+        "codezombiech.gitignore",
+        "oderwat.indent-rainbow",
+        "christian-kohler.npm-intellisense",
+        "ryu1kn.partial-diff",
+        // "rust-lang.rust-analyzer",
+        "flyfly6.terminal-in-status-bar",
+        "dotjoshjohnson.xml",
+        "redhat.vscode-yaml"
+        ]
+    }
+  }
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}
