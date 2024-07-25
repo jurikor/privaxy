@@ -33,7 +33,7 @@ jobs:
     - name: Cache build artifacts
       uses: actions/cache@v3
       with:
-        key:  cli_${{ matrix.target }}_artifacts_${{ hashFiles('Cargo.lock') }}
+        key:  cli_${{ matrix.target }}_artifacts_${{ hashFiles('Cargo.lock', '**/Cargo.toml') }}
         restore-keys:  cli_${{ matrix.target }}_artifacts
         path: |
           ./target
