@@ -33,7 +33,7 @@ jobs:
 
   fmt:
     runs-on: ubuntu-latest
-    name: ( fmt + hack ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}
+    name: "( fmt + hack ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}"
     permissions:
       contents: read
       checks: write
