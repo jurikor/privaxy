@@ -21,7 +21,7 @@ env:
 
 jobs:
   build-cli:
-    name: ${{ matrix.build }} / rust ${{ env.RUST_VERSION }}
+    name: privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
