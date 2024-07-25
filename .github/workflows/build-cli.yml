@@ -30,10 +30,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      
     - name: Cache build artifacts
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
-        key:  cli_${{ matrix.target }}_artifacts_${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+        key:  cli_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
         restore-keys:  cli_${{ matrix.target }}_artifacts
         path: |
           ./target
