@@ -72,7 +72,7 @@ jobs:
           target/${{ matrix.target }}/release/${{ matrix.bin }}
 
   build-gui:
-    name: ${{ matrix.build }} / rust ${{ env.RUST_VERSION }} / node ${{ env.NODE_VERSION }}
+    name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
