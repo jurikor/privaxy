@@ -1,0 +1,26 @@
+name: Privaxy CI
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - ".github/**"
+      - ".devcontainer/**"
+      - "*.md"
+      - ".*"
+  push:
+
+    branches: [dev, v*]
+    paths-ignore:
+      - ".github/**"
+      - ".devcontainer/**"
+      - "*.md"
+      - ".*"
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  build:
+    uses: ./.github/workflows/privaxy-build.yml
+    with:
+      upload-artifact: false

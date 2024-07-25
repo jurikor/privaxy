@@ -8,3 +8,5 @@ node_modules
 clean.sh
 update.sh
 check.sh
+build-cli.sh
+build-gui.sh

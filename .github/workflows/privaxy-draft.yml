@@ -1,0 +1,10 @@
+name: Privaxy Draft Build
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/privaxy-build.yml
+    with:
+      upload-artifact: true
+      upload-tag: "draft"

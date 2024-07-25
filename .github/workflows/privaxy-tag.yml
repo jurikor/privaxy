@@ -1,0 +1,16 @@
+name: Privaxy Tag Build
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-[0-9]+'
+
+jobs:
+  run-ci:
+    uses: ./.github/workflows/privaxy-build.yml
+    with:
+      upload-artifact: true
+      upload-tag: ${{ github.ref_name }}
