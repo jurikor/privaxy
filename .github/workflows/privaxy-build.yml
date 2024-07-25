@@ -72,6 +72,8 @@ jobs:
           target/${{ matrix.target }}/release/${{ matrix.bin }}
 
   build-gui:
+    needs:
+      - build-cli
     name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
