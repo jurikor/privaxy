@@ -33,7 +33,7 @@ jobs:
 
   fmt:
     runs-on: ubuntu-latest
-    name: "( fmt + hack ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}"
+    name: "( fmt + hack ) rust ${{ matrix.toolchain }} - node ${{ matrix.nodever }}"
     permissions:
       contents: read
       checks: write
@@ -108,7 +108,7 @@ jobs:
 
   clippy:
     runs-on: ubuntu-latest
-    name: ( clippy + doc ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}
+    name: "( clippy + doc ) rust ${{ matrix.toolchain }} - node ${{ matrix.nodever }}"
     permissions:
       contents: read
       checks: write
@@ -192,7 +192,7 @@ jobs:
         nodever: [14]
         trunkver: ["^0.18"]
         tauriver: ["^1.5"]
-    name: ( msrv ) rust ${{ matrix.toolchain }} / node ${{ matrix.nodever }}
+    name: "( msrv ) rust ${{ matrix.toolchain }} - node ${{ matrix.nodever }}"
     steps:
       - uses: actions/checkout@v4
         with:
