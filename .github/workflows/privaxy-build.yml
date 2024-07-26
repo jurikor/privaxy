@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-cli:
-    if: ( matrix.build == 'linux' && inputs.build-linux ) || ( matrix.build == 'windows' && inputs.build-windows )
+    if: ${{ matrix.execute }} == true
     name: privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,14 +37,17 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             bin: privaxy
+            execute: inputs.build-linux
           - build: windows
             os: windows-latest
             target: x86_64-pc-windows-msvc
             bin: privaxy.exe
+            execute: inputs.build-windows
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
     - name: Cache build artifacts
       uses: actions/cache@v4
       with:
@@ -82,7 +85,7 @@ jobs:
   build-gui:
     needs:
       - build-cli
-    if: ( matrix.build == 'linux' && inputs.build-linux ) || ( matrix.build == 'windows' && inputs.build-windows )
+    if: ${{ matrix.execute }} == true
     name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -122,6 +125,7 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
+
     - name: Cache build artifacts
       uses: actions/cache@v4
       with:
