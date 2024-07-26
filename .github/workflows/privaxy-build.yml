@@ -137,7 +137,7 @@ jobs:
         prerelease: true
         tag_name: ${{ env.UPLOAD_TAG }}
         files: |
-          privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}.gz
+          privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}.gz
 
   ############################################################################
   build-gui-linux:
