@@ -184,6 +184,8 @@ jobs:
         restore-keys:  gui_${{ matrix.target }}_artifacts
         path: |
           ./target
+          ./web_frontend/dist
+          ./web_frontend/node_modules
           ~/.cargo
 
     - name: Install node ${{ env.NODE_VERSION }}
@@ -285,6 +287,8 @@ jobs:
         restore-keys:  gui_${{ matrix.target }}_artifacts
         path: |
           ./target
+          ./web_frontend/dist
+          ./web_frontend/node_modules
           ~/.cargo
 
     - name: Install node ${{ env.NODE_VERSION }}
