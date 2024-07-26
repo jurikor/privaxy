@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-cli:
-    if: ( ${{ matrix.build }} == 'linux' && ${{ inputs.build-linux }} ) || ( ${{ matrix.build }} == 'windows' && ${{ inputs.build-windows }} )
+    if: ( matrix.build == 'linux' && inputs.build-linux ) || ( matrix.build == 'windows' && inputs.build-windows )
     name: privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -82,7 +82,7 @@ jobs:
   build-gui:
     needs:
       - build-cli
-    if: ( ${{ matrix.build }} == 'linux' && ${{ inputs.build-linux }} ) || ( ${{ matrix.build }} == 'windows' && ${{ inputs.build-windows }} )
+    if: ( matrix.build == 'linux' && inputs.build-linux ) || ( matrix.build == 'windows' && inputs.build-windows )
     name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
