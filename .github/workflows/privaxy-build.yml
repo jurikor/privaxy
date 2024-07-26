@@ -126,7 +126,7 @@ jobs:
     - name: Build cli app
       run: |
         cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target
-        copy /v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
+        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
         gzip -v privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
