@@ -85,7 +85,7 @@ jobs:
 
   ############################################################################
   build-cli-windows:
-    if: inputs.build-windows == 'true'
+    if: ${{ inputs.build-windows }}
     name: Build privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
