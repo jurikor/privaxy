@@ -87,8 +87,14 @@ jobs:
       - name: Install tauri-cli ${{ matrix.tauriver }}
         run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
 
-      - name: cargo fmt --check
-        run: cargo fmt --check
+      - name: Cache restore artifacts
+        uses: actions/cache/restore@v4
+        with:
+          key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+          restore-keys:  gui_${{ matrix.target }}_artifacts
+          path: |
+            ./target
+            ~/.cargo
 
       - name: Install node packages
         working-directory: ./web_frontend
@@ -98,6 +104,9 @@ jobs:
       - name: Build web frontend
         run: trunk build
         working-directory: ./web_frontend
+
+      - name: cargo fmt --check
+        run: cargo fmt --check
 
       - name: cargo install cargo-hack
         uses: taiki-e/install-action@cargo-hack
@@ -160,6 +169,15 @@ jobs:
 
       - name: Install tauri-cli ${{ matrix.tauriver }}
         run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
+
+      - name: Cache restore artifacts
+        uses: actions/cache/restore@v4
+        with:
+          key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+          restore-keys:  gui_${{ matrix.target }}_artifacts
+          path: |
+            ./target
+            ~/.cargo
 
       - name: Install node packages
         working-directory: ./web_frontend
@@ -234,6 +252,15 @@ jobs:
 
       - name: Install tauri-cli ${{ matrix.tauriver }}
         run: cargo binstall --version ${{ matrix.tauriver }} --locked -y tauri-cli
+
+      - name: Cache restore artifacts
+        uses: actions/cache/restore@v4
+        with:
+          key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+          restore-keys:  gui_${{ matrix.target }}_artifacts
+          path: |
+            ./target
+            ~/.cargo
 
       - name: Install node packages
         working-directory: ./web_frontend

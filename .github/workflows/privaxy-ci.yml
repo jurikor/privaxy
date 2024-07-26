@@ -16,12 +16,14 @@ on:
       - ".*"
 
 jobs:
-  check:
-    uses: ./.github/workflows/check.yml
-
   build:
-    needs:
-      - check
     uses: ./.github/workflows/privaxy-build.yml
     with:
       upload-artifact: false
+
+  check:
+    needs:
+      - build
+    uses: ./.github/workflows/check.yml
+
+
