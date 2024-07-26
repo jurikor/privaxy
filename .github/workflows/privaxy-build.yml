@@ -68,7 +68,6 @@ jobs:
     #     rustup -V
 
     - name: Build cli app
-      shell: bash
       run: |
         cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
         cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }} && \
@@ -125,10 +124,9 @@ jobs:
     #     rustup -V
 
     - name: Build cli app
-      shell: bash
       run: |
-        cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
-        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }} && \
+        cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target
+        copy /v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
         gzip -v privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
@@ -161,7 +159,6 @@ jobs:
 
     - name: Install System Dependencies
       if: startsWith(matrix.os, 'ubuntu') == true
-      shell: bash
       run: |
         sudo apt update && \
         sudo apt install -y \
@@ -213,15 +210,12 @@ jobs:
       uses: cargo-bins/cargo-binstall@main
 
     - name: Install trunk ${{ env.TRUNK_VERSION }}
-      shell: bash
       run: cargo binstall --version ${{ env.TRUNK_VERSION }} --target ${{ matrix.target }} --locked -y trunk
 
     - name: Install tauri-cli ${{ env.TAURI_VERSION }}
-      shell: bash
       run: cargo binstall --version ${{ env.TAURI_VERSION }} --target ${{ matrix.target }} --locked -y tauri-cli
 
     - name: Install node packages
-      shell: bash
       working-directory: ./web_frontend
       run: npm ci
 
@@ -235,7 +229,6 @@ jobs:
     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build tauri app
-      shell: bash
       run: cargo tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -269,7 +262,6 @@ jobs:
 
     - name: Install System Dependencies
       if: startsWith(matrix.os, 'ubuntu') == true
-      shell: bash
       run: |
         sudo apt update && \
         sudo apt install -y \
@@ -321,15 +313,12 @@ jobs:
       uses: cargo-bins/cargo-binstall@main
 
     - name: Install trunk ${{ env.TRUNK_VERSION }}
-      shell: bash
       run: cargo binstall --version ${{ env.TRUNK_VERSION }} --target ${{ matrix.target }} --locked -y trunk
 
     - name: Install tauri-cli ${{ env.TAURI_VERSION }}
-      shell: bash
       run: cargo binstall --version ${{ env.TAURI_VERSION }} --target ${{ matrix.target }} --locked -y tauri-cli
 
     - name: Install node packages
-      shell: bash
       working-directory: ./web_frontend
       run: npm ci
 
@@ -343,7 +332,6 @@ jobs:
     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build tauri app
-      shell: bash
       run: cargo tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
