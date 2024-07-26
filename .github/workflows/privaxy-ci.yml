@@ -20,6 +20,8 @@ jobs:
     uses: ./.github/workflows/privaxy-build.yml
     with:
       upload-artifact: false
+      build-linux: true
+      build-windows: false
 
   check:
     needs:
