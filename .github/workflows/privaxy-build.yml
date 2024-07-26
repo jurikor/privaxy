@@ -27,8 +27,10 @@ env:
   UPLOAD_TAG: "${{ inputs.upload-tag }}"
 
 jobs:
-  build-cli:
-    name: privaxy-cli on ${{ matrix.build }}
+  ############################################################################
+  build-cli-linux:
+    if: inputs.build-linux == 'true'
+    name: Build privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -38,22 +40,13 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: privaxy
             ext: ''
-            execute: "${{ inputs.build-linux }}"
-          - build: windows
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: privaxy
-            ext: exe
-            execute: "${{ inputs.build-windows }}"
 
     steps:
 
     - name: Checkout
-      if: matrix.execute == 'true'
       uses: actions/checkout@v4
 
     - name: Cache build artifacts
-      if: matrix.execute == 'true'
       uses: actions/cache@v4
       with:
         key:  cli_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
@@ -63,7 +56,6 @@ jobs:
           ~/.cargo
 
     - name: Install toolchain
-      if: matrix.execute == 'true'
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ env.RUST_VERSION }}
@@ -76,14 +68,13 @@ jobs:
     #     rustup -V
 
     - name: Build cli app
-      if: matrix.execute == 'true'
       run: |
         cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
         cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}.${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }} && \
         gzip privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
-      if: env.UPLOAD_ARTIFACT == 'true' && matrix.execute == 'true'
+      if: env.UPLOAD_ARTIFACT == 'true'
       # if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
@@ -92,9 +83,66 @@ jobs:
         files: |
           privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}.gz
 
-  build-gui:
+  ############################################################################
+  build-cli-windows:
+    if: inputs.build-windows == 'true'
+    name: Build privaxy-cli on ${{ matrix.build }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: privaxy
+            ext: exe
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache build artifacts
+      uses: actions/cache@v4
+      with:
+        key:  cli_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+        restore-keys:  cli_${{ matrix.target }}_artifacts
+        path: |
+          ./target
+          ~/.cargo
+
+    - name: Install toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+        targets: ${{ matrix.target }}
+
+    # - name: Show installed versions
+    #   run: |
+    #     rustc -V
+    #     cargo -V
+    #     rustup -V
+
+    - name: Build cli app
+      run: |
+        cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
+        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}.${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }} && \
+        gzip privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}
+
+    - name: Release to ${{ env.UPLOAD_TAG }}
+      if: env.UPLOAD_ARTIFACT == 'true'
+      # if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        prerelease: true
+        tag_name: ${{ env.UPLOAD_TAG }}
+        files: |
+          privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}.gz
+
+  ############################################################################
+  build-gui-linux:
     needs:
-      - build-cli
+      - build-cli-linux
     name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -106,19 +154,11 @@ jobs:
             bin: |
               target/release/bundle/deb/*.deb
               target/release/bundle/appimage/*.AppImage
-            execute: "${{ inputs.build-linux }}"
-          - build: windows
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: |
-              target/release/bundle/msi/*.msi
-              target/release/bundle/nsis/*.exe
-            execute: "${{ inputs.build-windows }}"
 
     steps:
 
     - name: Install System Dependencies
-      if: startsWith(matrix.os, 'ubuntu') == true && matrix.execute == 'true'
+      if: startsWith(matrix.os, 'ubuntu') == true
       run: |
         sudo apt update && \
         sudo apt install -y \
@@ -135,11 +175,9 @@ jobs:
           libjavascriptcoregtk-4.0-dev
 
     - name: Checkout
-      if: matrix.execute == 'true'
       uses: actions/checkout@v4
 
     - name: Cache build artifacts
-      if: matrix.execute == 'true'
       uses: actions/cache@v4
       with:
         key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
@@ -149,13 +187,11 @@ jobs:
           ~/.cargo
 
     - name: Install node ${{ env.NODE_VERSION }}
-      if: matrix.execute == 'true'
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Install toolchain ${{ env.RUST_VERSION }}
-      if: matrix.execute == 'true'
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ env.RUST_VERSION }}
@@ -169,19 +205,15 @@ jobs:
     #     node -v || node --version
 
     - name: Install cargo-binstall
-      if: matrix.execute == 'true'
       uses: cargo-bins/cargo-binstall@main
 
     - name: Install trunk ${{ env.TRUNK_VERSION }}
-      if: matrix.execute == 'true'
       run: cargo binstall --version ${{ env.TRUNK_VERSION }} --target ${{ matrix.target }} --locked -y trunk
 
     - name: Install tauri-cli ${{ env.TAURI_VERSION }}
-      if: matrix.execute == 'true'
       run: cargo binstall --version ${{ env.TAURI_VERSION }} --target ${{ matrix.target }} --locked -y tauri-cli
 
     - name: Install node packages
-      if: matrix.execute == 'true'
       working-directory: ./web_frontend
       run: npm ci
 
@@ -195,13 +227,12 @@ jobs:
     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build tauri app
-      if: matrix.execute == 'true'
       run: cargo tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
-      if: env.UPLOAD_ARTIFACT == 'true' && matrix.execute == 'true'
+      if: env.UPLOAD_ARTIFACT == 'true'
       # if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2
       with:
@@ -209,3 +240,103 @@ jobs:
         tag_name: ${{ env.UPLOAD_TAG }}
         files: ${{ matrix.bin }}
 
+  ############################################################################
+  build-gui-windows:
+    needs:
+      - build-cli-windows
+    name: privaxy-gui on ${{ matrix.build }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: |
+              target/release/bundle/msi/*.msi
+              target/release/bundle/nsis/*.exe
+
+    steps:
+
+    - name: Install System Dependencies
+      if: startsWith(matrix.os, 'ubuntu') == true
+      run: |
+        sudo apt update && \
+        sudo apt install -y \
+          libwebkit2gtk-4.0-dev \
+          build-essential \
+          curl \
+          wget \
+          file \
+          libssl-dev \
+          libgtk-3-dev \
+          libayatana-appindicator3-dev \
+          librsvg2-dev \
+          libsoup2.4-dev \
+          libjavascriptcoregtk-4.0-dev
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache build artifacts
+      uses: actions/cache@v4
+      with:
+        key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+        restore-keys:  gui_${{ matrix.target }}_artifacts
+        path: |
+          ./target
+          ~/.cargo
+
+    - name: Install node ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install toolchain ${{ env.RUST_VERSION }}
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+        targets: ${{ matrix.target }}, wasm32-unknown-unknown
+
+    # - name: Show installed versions
+    #   run: |
+    #     rustc -V
+    #     cargo -V
+    #     rustup -V
+    #     node -v || node --version
+
+    - name: Install cargo-binstall
+      uses: cargo-bins/cargo-binstall@main
+
+    - name: Install trunk ${{ env.TRUNK_VERSION }}
+      run: cargo binstall --version ${{ env.TRUNK_VERSION }} --target ${{ matrix.target }} --locked -y trunk
+
+    - name: Install tauri-cli ${{ env.TAURI_VERSION }}
+      run: cargo binstall --version ${{ env.TAURI_VERSION }} --target ${{ matrix.target }} --locked -y tauri-cli
+
+    - name: Install node packages
+      working-directory: ./web_frontend
+      run: npm ci
+
+    # - name: Build web frontend
+    #   run: trunk build --release
+    #   working-directory: ./web_frontend
+
+    # - name: Build gui app
+    #   uses: tauri-apps/tauri-action@v0.4
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build tauri app
+      run: cargo tauri build
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release to ${{ env.UPLOAD_TAG }}
+      if: env.UPLOAD_ARTIFACT == 'true'
+      # if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v2
+      with:
+        prerelease: true
+        tag_name: ${{ env.UPLOAD_TAG }}
+        files: ${{ matrix.bin }}
