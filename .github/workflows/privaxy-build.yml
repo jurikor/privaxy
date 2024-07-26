@@ -30,7 +30,7 @@ jobs:
   ############################################################################
   build-cli-linux:
     if: ${{ inputs.build-linux }}
-    name: Build privaxy-cli on ${{ matrix.build }}
+    name: Build privaxy-cli for x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -70,8 +70,8 @@ jobs:
     - name: Build cli app
       run: |
         cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
-        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}.${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }} && \
-        gzip privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}
+        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }} && \
+        gzip -v privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
       if: env.UPLOAD_ARTIFACT == 'true'
@@ -86,7 +86,7 @@ jobs:
   ############################################################################
   build-cli-windows:
     if: ${{ inputs.build-windows }}
-    name: Build privaxy-cli on ${{ matrix.build }}
+    name: Build privaxy-cli for x86_64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -95,7 +95,7 @@ jobs:
             os: windows-latest
             target: x86_64-pc-windows-msvc
             bin: privaxy
-            ext: exe
+            ext: .exe
 
     steps:
 
@@ -126,8 +126,8 @@ jobs:
     - name: Build cli app
       run: |
         cargo build --release --target ${{ matrix.target }} --bin privaxy --target-dir target && \
-        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}.${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }} && \
-        gzip privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}.${{ matrix.ext }}
+        cp -v target/${{ matrix.target }}/release/${{ matrix.bin }}${{ matrix.ext }} privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }} && \
+        gzip -v privaxy-cli-${{ matrix.build }}-${{ env.VERSION }}${{ matrix.ext }}
 
     - name: Release to ${{ env.UPLOAD_TAG }}
       if: env.UPLOAD_ARTIFACT == 'true'
@@ -143,7 +143,7 @@ jobs:
   build-gui-linux:
     needs:
       - build-cli-linux
-    name: privaxy-gui on ${{ matrix.build }}
+    name: Build privaxy-gui for x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -244,7 +244,7 @@ jobs:
   build-gui-windows:
     needs:
       - build-cli-windows
-    name: privaxy-gui on ${{ matrix.build }}
+    name: Build privaxy-gui for x86_64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
