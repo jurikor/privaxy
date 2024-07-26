@@ -9,6 +9,12 @@ on:
       upload-tag:
         type: string
         default: "draft"
+      build-linux:
+        type: boolean
+        default: true
+      build-windows:
+        type: boolean
+        default: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,6 +27,7 @@ env:
 
 jobs:
   build-cli:
+    if: ( ${{ matrix.build }} == 'linux' && ${{ inputs.build-linux }} ) || ( ${{ matrix.build }} == 'windows' && ${{ inputs.build-windows }} )
     name: privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -75,6 +82,7 @@ jobs:
   build-gui:
     needs:
       - build-cli
+    if: ( ${{ matrix.build }} == 'linux' && ${{ inputs.build-linux }} ) || ( ${{ matrix.build }} == 'windows' && ${{ inputs.build-windows }} )
     name: privaxy-gui on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:

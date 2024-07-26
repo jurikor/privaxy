@@ -52,8 +52,8 @@ jobs:
       - name: Cache restore artifacts
         uses: actions/cache/restore@v4
         with:
-          key:  gui_${{ matrix.target }}_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
-          restore-keys:  gui_${{ matrix.target }}_artifacts
+          key:  gui_x86_64-unknown-linux-gnu_artifacts-${{ hashFiles('Cargo.lock', 'web_frontend/package-lock.json') }}
+          restore-keys:  gui_x86_64-unknown-linux-gnu_artifacts
           path: |
             ./target
             ~/.cargo
@@ -105,7 +105,7 @@ jobs:
         working-directory: ./web_frontend
 
       - name: cargo fmt --check
-        run: cargo fmt --check
+        run: cargo fmt --check --all
 
       - name: cargo install cargo-hack
         uses: taiki-e/install-action@cargo-hack
