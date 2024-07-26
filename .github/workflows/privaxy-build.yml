@@ -38,13 +38,13 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: privaxy
             ext: ''
-            execute: inputs.build-linux
+            execute: ${{ inputs.build-linux }}
           - build: windows
             os: windows-latest
             target: x86_64-pc-windows-msvc
             bin: privaxy
             ext: exe
-            execute: inputs.build-windows
+            execute: ${{ inputs.build-windows }}
 
     steps:
 
