@@ -29,7 +29,7 @@ env:
 jobs:
   ############################################################################
   build-cli-linux:
-    if: inputs.build-linux == 'true'
+    if: ${{ inputs.build-linux }}
     name: Build privaxy-cli on ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
