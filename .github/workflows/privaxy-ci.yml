@@ -24,6 +24,7 @@ jobs:
   check:
     needs:
       - build
+    if: ${{ always() }}
     uses: ./.github/workflows/check.yml
 
 
