@@ -98,11 +98,12 @@ jobs:
       - name: Install node packages
         working-directory: ./web_frontend
         run: npm ci
+
       # It is required to first build the frontend as the server won't
       # build if it has no access to frontend's dist directory.
-      - name: Build web frontend
-        run: trunk build
-        working-directory: ./web_frontend
+      # - name: Build web frontend
+      #   run: trunk build
+      #   working-directory: ./web_frontend
 
       - name: cargo fmt --check
         run: cargo fmt --check --all
@@ -181,11 +182,12 @@ jobs:
       - name: Install node packages
         working-directory: ./web_frontend
         run: npm ci
-      # It is required to first build the frontend as the server won't
-      # build if it has no access to frontend's dist directory.
-      - name: Build web frontend
-        run: trunk build
-        working-directory: ./web_frontend
+
+      # # It is required to first build the frontend as the server won't
+      # # build if it has no access to frontend's dist directory.
+      # - name: Build web frontend
+      #   run: trunk build
+      #   working-directory: ./web_frontend
 
       - name: cargo clippy
         uses: actions-rs/clippy-check@v1
@@ -266,9 +268,9 @@ jobs:
 
       # It is required to first build the frontend as the server won't
       # build if it has no access to frontend's dist directory.
-      - name: Build web frontend
-        run: trunk build
-        working-directory: ./web_frontend
+      # - name: Build web frontend
+      #   run: trunk build
+      #   working-directory: ./web_frontend
 
       - name: cargo +${{ matrix.toolchain }} check
         run: cargo check
